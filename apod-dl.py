@@ -43,7 +43,7 @@ def get_apod(url, adir):
         imgtext = re.sub("\n", " ", imgtext).strip()
         imgtext = re.sub(spaceregex, " ", imgtext)
 
-        with open(os.path.join(adir, "album_list.txt"), "at") as albumfd:
+        with open(os.path.join(adir, "album_list.txt"), "at", encoding="utf-8") as albumfd:
             print(f'save album list to {os.path.join(adir, "album_list.txt")}')
             albumfd.write(
                 imgdate
