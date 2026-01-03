@@ -7,6 +7,8 @@ import argparse
 import json
 from tqdm.auto import tqdm, trange
 from bs4 import BeautifulSoup
+from datetime import datetime
+from email.utils import parsedate_to_datetime
 import urllib3
 
 urllib3.disable_warnings()
@@ -68,7 +70,13 @@ def get_apod(url, adir):
                 total = int(imageresp.headers.get("content-length", 0))
                 print(total)
                 imageresp.raise_for_status()
-                with open(os.path.join(adir, imgfilename), "wb") as fd:
+                last_modified = imageresp.headers.get('Last-Modified')
+                if last_modified:
+                    imgtimestamp = parsedate_to_datetime(last_modified).timestamp()
+                else:
+                    imgtimestamp = datetime.strptime(imgdate, "%Y %B %d").timestamp()
+                file_path = os.path.join(adir, imgfilename)
+                with open(file_path, "wb") as fd:
                     for chunk in tqdm(
                         imageresp.iter_content(chunk_size=1024),
                         total=total / 1024,
@@ -80,6 +88,7 @@ def get_apod(url, adir):
                         fd.write(chunk)
                     print("\n")
                     fd.flush()
+                    os.utime(file_path, (imgtimestamp, imgtimestamp))
                 imageresp.close()
             else:
                 print(f"file {imgfilename} already downloaded\n")
