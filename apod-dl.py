@@ -86,12 +86,12 @@ def get_apod(url, adir):
             albumfd.flush()
 
     try:
-        prevlink = parenturl + "/" + apodsoup.find_all("a", string="<")[0].get("href")
+        nextlink = parenturl + "/" + apodsoup.find_all("a", string=nextcue)[0].get("href")
     except Exception as exc:
-        print(f"Can not find previous link")
+        print(f"Can not find link to next or previous day")
 
     sess.close()
-    return prevlink
+    return nextlink
 
 
 if __name__ == "__main__":
@@ -117,6 +117,13 @@ if __name__ == "__main__":
         action="store_true",
         help="just get the one day's apod and nothing else",
     )
+    ap.add_argument(
+        "-f",
+        "--forwards",
+        required=False,
+        action="store_true",
+        help="parse from day forwards instead of backwards",
+    )
     args = ap.parse_args()
 
     if args.url:
@@ -128,6 +135,11 @@ if __name__ == "__main__":
         SAVEDIR = args.dir
     else:
         SAVEDIR = "apod-images"
+
+    if args.forwards:
+        nextcue = ">"
+    else:
+        nextcue = "<"
 
     if args.oneday:
         _ = get_apod(url, SAVEDIR)
